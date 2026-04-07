@@ -1,0 +1,32 @@
+fastapi
+uvicorn
+python-multipart
+aiofiles
+
+# Step 2 - Watermark + Fingerprint + Storage
+opencv-python
+numpy
+Pillow
+torch
+torchvision
+ftfy
+regex
+pymongo
+qdrant-client
+opencv-python-headless
+
+
+yt-dlp
+requests
+beautifulsoup4
+playwright
+fake-useragent
+bcrypt==4.0.1
+pydantic[email]
+
+python-jose[cryptography] 
+passlib[bcrypt] 
+
+# CLIP installed separately - run this after pip install -r requirements.txt:
+# pip install git+https://github.com/openai/CLIP.git
+# python -m playwright install chromium

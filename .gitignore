@@ -1,0 +1,8 @@
+/backend/.env
+/backend/venv
+/backend/__pycache__
+/backend/utils/__pycache__
+/backend/routers/__pycache__
+
+/frontend/node_modules
+/backend/temp_frames
