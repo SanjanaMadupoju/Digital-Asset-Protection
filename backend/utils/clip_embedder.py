@@ -58,9 +58,10 @@ def frames_to_fingerprint(frames: list) -> list:
     print(f"[CLIP] Processing {len(frames)} frames...")
 
     for i, frame_bgr in enumerate(frames):
+        print("came here1")
         # Step 1: OpenCV uses BGR, PIL uses RGB — must convert
         frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-
+        print("came here2")
         # Step 2: Convert numpy array to PIL Image (CLIP preprocessor needs PIL)
         pil_image = Image.fromarray(frame_rgb)
 

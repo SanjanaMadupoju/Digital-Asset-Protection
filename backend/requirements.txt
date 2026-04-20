@@ -27,6 +27,8 @@ pydantic[email]
 python-jose[cryptography] 
 passlib[bcrypt] 
 
+firebase-admin
+google-cloud-firestore
 # CLIP installed separately - run this after pip install -r requirements.txt:
 # pip install git+https://github.com/openai/CLIP.git
 # python -m playwright install chromium
