@@ -231,84 +231,55 @@
 //   )
 // } 
 
-
 import React, { useState } from 'react'
 import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/layout/Navbar'
+import Sidebar from './components/layout/Sidebar'
 import Footer from './components/layout/Footer'
 import Home from './components/pages/Home'
-import VideoUploader from './components/VideoUploader'
+import UploadPage from './components/pages/UploadPage'
+import FingerprintPage from './components/pages/FingerprintPage'
+import ScrapePage from './components/pages/ScrapePage'
+import MatchPage from './components/pages/MatchPage'
 import Dashboard from './components/Dashboard'
-import Fingerprint from './components/Fingerprint'
-import Scrape from './components/Scrape'
-import FingerprintScraped from './components/FingerprintScraped'
 
-const STEPS = [
-  { key: 'upload',             label: '1 · Upload'         },
-  { key: 'fingerprint',        label: '2 · Fingerprint'    },
-  { key: 'scrape',             label: '3 · Scrape'         },
-  { key: 'fingerprintscraped', label: '4 · Match scraped'  },
-  { key: 'dashboard',          label: '5–6 · Dashboard'    },
-]
-
-const PAGE_LABELS = {
-  upload:             { title: 'Upload your sports video',     sub: 'Step 1 — Upload and secure your media'          },
-  fingerprint:        { title: 'Generate AI fingerprint',      sub: 'Step 2 — Watermark + Google Vision AI embedding' },
-  scrape:             { title: 'Scan the web',                 sub: 'Step 3 — Search platforms for your content'     },
-  fingerprintscraped: { title: 'Analyse candidate videos',     sub: 'Step 4 — Compare scraped videos to your original'},
-  dashboard:          { title: 'Detection dashboard',          sub: 'Steps 5–6 — Review matches and generate reports' },
-}
+const APP_PAGES = ['upload','fingerprint','scrape','fingerprintscraped','dashboard']
 
 function AppInner() {
   const [page, setPage] = useState('home')
-
   const isHome = page === 'home'
 
   return (
     <div className="page-wrapper">
-      <Navbar
-        currentPage={page}
-        onNavigate={setPage}
-      />
-
       {isHome ? (
-        <Home
-          onGetStarted={() => setPage('upload')}
-          onDashboard={() => setPage('dashboard')}
-        />
+        <>
+          <Navbar currentPage={page} onNavigate={setPage} />
+          <Home
+            onGetStarted={() => setPage('upload')}
+            onDashboard={()  => setPage('dashboard')}
+          />
+          <Footer />
+        </>
       ) : (
-        <div className="app-content">
-          {/* Page header */}
-          <div className="page-header">
-            <h1 className="page-title">{PAGE_LABELS[page]?.title}</h1>
-            <p className="page-sub">{PAGE_LABELS[page]?.sub}</p>
-          </div>
+        <>
+        <Navbar currentPage={page} onNavigate={setPage} />
+        <div className="app-layout">
+          {/* Left sidebar */}
+          <Sidebar currentPage={page} onNavigate={setPage} />
 
-          {/* Step tabs */}
-          <div className="step-tabs mb-24">
-            {STEPS.map(s => (
-              <button
-                key={s.key}
-                className={`step-tab ${page === s.key ? 'active' : ''}`}
-                onClick={() => setPage(s.key)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Step content */}
-          <div className="step-content">
-            {page === 'upload'             && <VideoUploader />}
-            {page === 'fingerprint'        && <Fingerprint />}
-            {page === 'scrape'             && <Scrape />}
-            {page === 'fingerprintscraped' && <FingerprintScraped />}
-            {page === 'dashboard'          && <Dashboard />}
-          </div>
+          {/* Main content */}
+          <main className="app-main">
+            <div className="app-main-inner">
+              {page === 'upload'             && <UploadPage />}
+              {page === 'fingerprint'        && <FingerprintPage />}
+              {page === 'scrape'             && <ScrapePage />}
+              {page === 'fingerprintscraped' && <MatchPage />}
+              {page === 'dashboard'          && <Dashboard />}
+            </div>
+          </main>
         </div>
+        </>
       )}
-
-      {isHome && <Footer />}
     </div>
   )
 }

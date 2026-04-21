@@ -1,0 +1,337 @@
+/* ─── Keyframes ──────────────────────────────────────────────────────────────── */
+@keyframes pulse-ring {
+    0%   { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  
+  @keyframes radar-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  
+  @keyframes radar-sweep {
+    0%   { transform: rotate(0deg); opacity: 1; }
+    100% { transform: rotate(360deg); opacity: 1; }
+  }
+  
+  @keyframes shield-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+  }
+  
+  @keyframes shield-lock {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  
+  @keyframes wave-scan {
+    0%   { transform: translateY(-100%); opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateY(400%); opacity: 0; }
+  }
+  
+  @keyframes dot-pulse {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50%       { opacity: 1;   transform: scale(1.2); }
+  }
+  
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+  
+  @keyframes count-up {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(85,99,255,0.2); }
+    50%       { box-shadow: 0 0 40px rgba(85,99,255,0.5); }
+  }
+  
+  @keyframes particle-float {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+    33%       { transform: translate(10px, -15px) scale(1.2); opacity: 1; }
+    66%       { transform: translate(-8px, -8px) scale(0.9); opacity: 0.7; }
+  }
+  
+  /* ─── Shield animation ───────────────────────────────────────────────────────── */
+  .shield-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 32px;
+  }
+  
+  .shield-icon {
+    font-size: 64px;
+    animation: shield-bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(85,99,255,0.4));
+  }
+  
+  .shield-icon.locked {
+    animation: shield-lock 0.4s ease-in-out, shield-bounce 2s ease-in-out 0.4s infinite;
+    filter: drop-shadow(0 0 24px rgba(63,185,80,0.5));
+  }
+  
+  .shield-rings {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .shield-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    animation: pulse-ring 2s ease-out infinite;
+  }
+  
+  .shield-ring:nth-child(1) { width: 80px;  height: 80px;  animation-delay: 0s; }
+  .shield-ring:nth-child(2) { width: 80px;  height: 80px;  animation-delay: 0.6s; }
+  .shield-ring:nth-child(3) { width: 80px;  height: 80px;  animation-delay: 1.2s; }
+  
+  /* ─── Radar animation ────────────────────────────────────────────────────────── */
+  .radar-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 24px;
+  }
+  
+  .radar-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid var(--border-accent);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .radar-circle:nth-child(1) { width: 60px;  height: 60px;  opacity: 0.8; }
+  .radar-circle:nth-child(2) { width: 100px; height: 100px; opacity: 0.5; }
+  .radar-circle:nth-child(3) { width: 140px; height: 140px; opacity: 0.3; }
+  .radar-circle:nth-child(4) { width: 180px; height: 180px; opacity: 0.15; }
+  
+  .radar-sweep {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    top: 50%; left: 50%;
+    transform-origin: 0% 0%;
+    animation: radar-sweep 3s linear infinite;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(85,99,255,0.4) 60deg,
+      transparent 60deg
+    );
+    border-radius: 0 100% 0 0;
+  }
+  
+  .radar-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1s ease-in-out infinite;
+  }
+  
+  .radar-center {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px var(--accent);
+  }
+  
+  /* ─── Waveform scanner ───────────────────────────────────────────────────────── */
+  .waveform-container {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: wave-scan 2.5s ease-in-out infinite;
+  }
+  
+  .waveform-bars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 100%;
+    padding: 16px;
+  }
+  
+  .waveform-bar {
+    width: 4px;
+    border-radius: 2px;
+    background: var(--border-accent);
+    animation: dot-pulse 1.2s ease-in-out infinite;
+  }
+  
+  /* ─── Particle grid ──────────────────────────────────────────────────────────── */
+  .particle-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 12px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  
+  .particle-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: particle-float 3s ease-in-out infinite;
+    margin: 0 auto;
+  }
+  
+  /* ─── Processing status ──────────────────────────────────────────────────────── */
+  .processing-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-accent);
+    font-size: 13px;
+    color: var(--text-accent);
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+  
+  .processing-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border-accent);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  
+  /* ─── Step progress indicator ────────────────────────────────────────────────── */
+  .step-progress {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 32px;
+    width: 100%;
+  }
+  
+  .step-progress-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+  }
+  
+  .step-progress-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  
+  .step-progress-item.done:not(:last-child)::after  { background: var(--accent); }
+  
+  .step-progress-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-page);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    color: var(--text-muted);
+    position: relative; z-index: 1;
+    transition: all 0.3s ease;
+  }
+  
+  .step-progress-item.done   .step-progress-circle { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .step-progress-item.active .step-progress-circle { border-color: var(--accent); color: var(--accent); animation: glow-pulse 1.5s ease-in-out infinite; }
+  
+  .step-progress-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  
+  .step-progress-item.active .step-progress-label { color: var(--text-accent); font-weight: 600; }
+  .step-progress-item.done   .step-progress-label { color: var(--text-success); }
+  
+  /* ─── Card entrance animation ────────────────────────────────────────────────── */
+  .animate-fade-up   { animation: fade-up 0.4s ease forwards; }
+  .animate-slide-in  { animation: slide-in-left 0.3s ease forwards; }
+  
+  .animate-fade-up:nth-child(1) { animation-delay: 0.0s; }
+  .animate-fade-up:nth-child(2) { animation-delay: 0.1s; }
+  .animate-fade-up:nth-child(3) { animation-delay: 0.2s; }
+  .animate-fade-up:nth-child(4) { animation-delay: 0.3s; }
+  
+  /* ─── Shimmer loading ────────────────────────────────────────────────────────── */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--bg-surface) 25%,
+      var(--bg-card-hover) 50%,
+      var(--bg-surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+  }
+  
+  /* ─── Success burst ──────────────────────────────────────────────────────────── */
+  .success-burst {
+    animation: count-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }

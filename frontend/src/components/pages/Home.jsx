@@ -5,7 +5,7 @@ import HowItWorksSection from '../sections/HowItWorksSection'
 
 export default function Home({ onGetStarted, onDashboard }) {
   return (
-    <main>
+    <main id="home">
       {/* Star field background */}
       <div className="star-field" />
 
@@ -36,7 +36,7 @@ export default function Home({ onGetStarted, onDashboard }) {
               className="btn btn-primary btn-lg"
               onClick={onGetStarted}
             >
-              Get started — it's free
+              Get started
             </button>
           </div>
         </div>

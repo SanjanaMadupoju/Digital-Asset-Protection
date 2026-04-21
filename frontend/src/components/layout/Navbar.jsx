@@ -5,6 +5,7 @@ export default function Navbar({ currentPage, onNavigate }) {
   const { theme, toggleTheme } = useTheme()
 
   const NAV_LINKS = [
+    { label: 'Home',         anchor: 'home'        },
     { label: 'Features',     anchor: 'features'    },
     { label: 'How it works', anchor: 'how-it-works' },
   ]
@@ -29,8 +30,9 @@ export default function Navbar({ currentPage, onNavigate }) {
           ))
         ) : (
           <span
-            className="nav-link"
+            className="nav-link btn btn-primary btn-sm"
             onClick={() => onNavigate('home')}
+            style={{ color: "white" }}
           >
             ← Back to home
           </span>
