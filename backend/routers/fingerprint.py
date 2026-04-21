@@ -156,9 +156,8 @@ async def generate_fingerprint(video_id: str):
     video_path = _find_video_file(video_id)
     print(f"\n[Step2] Starting for: {video_id}")
 
-    output_path = None
     try:
-        clip_frames, output_path = extract_and_watermark_frames(video_path, video_id)
+        _full_res_frames, clip_frames, output_path = extract_and_watermark_frames(video_path, video_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Frame extraction failed: {e}")
 
@@ -173,9 +172,9 @@ async def generate_fingerprint(video_id: str):
     if not fingerprint_vector:
         raise HTTPException(status_code=500, detail="Empty fingerprint.")
     
-    if(output_path==None):
+    if not output_path:
         output_path = video_path
-    
+
     print(f"storing {output_path} video to mongo")
 
     timestamp = datetime.datetime.utcnow().isoformat()

@@ -7,8 +7,8 @@ aiofiles
 opencv-python
 numpy
 Pillow
-torch
-torchvision
+# torch
+# torchvision
 ftfy
 regex
 pymongo
@@ -29,6 +29,11 @@ passlib[bcrypt]
 
 firebase-admin
 google-cloud-firestore
+google-cloud-firestore
+google-cloud-vision
+google-cloud-aiplatform
+google-auth
+google-auth-httplib2
 # CLIP installed separately - run this after pip install -r requirements.txt:
 # pip install git+https://github.com/openai/CLIP.git
 # python -m playwright install chromium
