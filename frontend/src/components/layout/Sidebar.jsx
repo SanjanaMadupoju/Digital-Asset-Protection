@@ -14,11 +14,6 @@ export default function Sidebar({ currentPage, onNavigate }) {
 
   return (
     <aside className="sidebar">
-      {/* Brand */}
-      {/* <div className="sidebar-brand" onClick={() => onNavigate('home')}>
-        <div className="brand-icon">🛡️</div>
-        <span className="brand-name">SportGuard</span>
-      </div> */}
 
       {/* Nav steps */}
       <nav className="sidebar-nav">
@@ -38,23 +33,6 @@ export default function Sidebar({ currentPage, onNavigate }) {
           </button>
         ))}
       </nav>
-
-      {/* Bottom: home + theme toggle */}
-      {/* <div className="sidebar-footer">
-        <button className="sidebar-home-btn" onClick={() => onNavigate('home')}>
-          ← Back to home
-        </button>
-        <div className="sidebar-theme-row">
-          <span className="sidebar-theme-label">
-            {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
-          </span>
-          <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
-            <div className="theme-toggle-knob">
-              {theme === 'dark' ? '🌙' : '☀️'}
-            </div>
-          </button>
-        </div>
-      </div> */}
     </aside>
   )
 }
