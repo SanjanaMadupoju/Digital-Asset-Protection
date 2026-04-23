@@ -64,7 +64,6 @@ def fingerprint_scraped_urls(video_id: str, limit: int = 10):
 
         try:
             # Download frames (full_res for watermark, clip for CLIP)
-            # full_res_frames, clip_frames = download_frames(url, platform)
             frames = download_frames(url, platform)
 
             if not frames:
@@ -79,25 +78,19 @@ def fingerprint_scraped_urls(video_id: str, limit: int = 10):
                         update_url_status(url, {"status": "failed", "error": "no_frames"})
                         results["details"].append(entry)
                         continue
-                    # full_res_frames, clip_frames = full_res_r, clip_r
 
-            # if not clip_frames:
-            #     entry["error"] = "No frames downloaded"
-            #     entry["failed"] += 1
-            #     update_url_status(url, {"status": "failed", "error": "no_frames"})
-            #     results["details"].append(entry)
-            #     continue
+            FRAME_INTERVAL_SECONDS = 5
+            wm_result = {"verified": False, "org_match_pct": 0, "id_match_pct": 0}
+            frame_step = max(1, int(FRAME_INTERVAL_SECONDS))
 
-            # Watermark check on full resolution
-            wm_result = {"verified": False, "org_found": False,
-                         "id_found": False, "char_match_pct": 0, "extracted_text": ""}
-            for frame in frames[:3]:
-                wm = verify_watermark(frame, video_id)
-                if wm["verified"]:
-                    wm_result = wm
-                    break
-                if wm.get("char_match_pct", 0) > wm_result.get("char_match_pct", 0):
-                    wm_result = wm
+            for i, frame in enumerate(frames):
+                if i % frame_step == 0:
+                    wm = verify_watermark(frame, video_id)
+                    if wm["verified"]:
+                        wm_result = wm
+                        break
+                    if wm.get("org_match_pct", 0) > wm_result.get("org_match_pct", 0):
+                        wm_result = wm
 
             watermark_found = wm_result["verified"]
             print(f"[Step4] Watermark: {'FOUND' if watermark_found else 'not found'} | "

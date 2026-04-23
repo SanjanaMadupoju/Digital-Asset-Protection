@@ -40,4 +40,5 @@ def ensure_qdrant_collection():
         else:
             print(f"[Qdrant] Collection exists: {COLLECTION_NAME}")
     except Exception as e:
-        print(f"[Qdrant] WARNING: {e}")
+        print(f"[Qdrant] WARNING: Startup check failed: {e}")
+        print(f"[Qdrant] Will retry on first request — server continuing...")

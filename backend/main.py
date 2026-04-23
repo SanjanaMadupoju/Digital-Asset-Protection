@@ -23,7 +23,10 @@ os.makedirs("temp_frames", exist_ok=True)
 
 @app.on_event("startup")
 def startup():
-    ensure_qdrant_collection()
+    try:
+        ensure_qdrant_collection()
+    except Exception as e:
+        print(f"[Startup] Qdrant unavailable: {e} — will retry on requests")
 
 app.include_router(upload.router,              prefix="/api", tags=["Step 1 - Upload"])
 app.include_router(fingerprint.router,         prefix="/api", tags=["Step 2 - Fingerprint"])

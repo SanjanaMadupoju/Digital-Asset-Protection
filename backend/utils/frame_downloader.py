@@ -91,7 +91,8 @@ def _extract_frames_from_clip(clip_path: str, n_frames: int = TARGET_FRAMES) -> 
         return []
 
     fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_step = max(1, int(fps * 2))  # same as FRAME_INTERVAL_SECONDS = 2
+    # frame_step = max(1, int(fps * 2))  # same as FRAME_INTERVAL_SECONDS = 2
+    frame_step = max(1, int(fps * 5))
 
     frames = []
     frame_number = 0

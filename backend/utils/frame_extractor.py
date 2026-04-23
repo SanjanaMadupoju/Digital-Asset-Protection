@@ -9,7 +9,8 @@ import os
 import numpy as np
 from utils.watermark import embed_watermark
 
-FRAME_INTERVAL_SECONDS = 2
+# FRAME_INTERVAL_SECONDS = 2
+FRAME_INTERVAL_SECONDS = 5
 RESIZE_SIZE = (512, 512)   # larger than before since Vision API handles its own resize
 TEMP_FRAMES_DIR = os.path.join(os.path.dirname(__file__), "..", "temp_frames")
 
@@ -58,14 +59,15 @@ def extract_and_watermark_frames(video_path: str, video_id: str) -> tuple:
         if not ok:
             break
 
-        wm_frame = embed_watermark(frame, video_id)
-        writer.write(wm_frame)
-
         if frame_number % frame_step == 0:
+            wm_frame = embed_watermark(frame, video_id)  # watermark only at 5s intervals
             full_res_frames.append(wm_frame.copy())
             resized_frames.append(cv2.resize(wm_frame, RESIZE_SIZE))
-
+        else:
+            wm_frame = frame  # write original frame, no watermark
         frame_number += 1
+
+        writer.write(wm_frame)
 
     writer.release()
     cap.release()
