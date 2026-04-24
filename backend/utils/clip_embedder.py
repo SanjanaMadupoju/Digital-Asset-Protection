@@ -15,6 +15,8 @@ Embedding: We use Google's multimodal embedding endpoint
 import cv2
 import numpy as np
 import base64
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import json
 import requests
@@ -23,6 +25,7 @@ import io
 import warnings
 import google.auth
 import google.auth.transport.requests
+import tempfile
 warnings.filterwarnings("ignore")
 
 VECTOR_SIZE = 1408   # Google Vision embedding size
@@ -30,11 +33,10 @@ VECTOR_SIZE = 1408   # Google Vision embedding size
 
 def _get_access_token() -> str:
     """Gets Google Cloud access token from service account."""
-
+    
     # Try environment variable first (production)
     service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
     if service_account_json:
-        import tempfile
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             f.write(service_account_json)
             temp_path = f.name
@@ -151,4 +153,3 @@ def frames_to_fingerprint(frames: list) -> list | None:
     fingerprint = mean_vec.tolist()
     print(f"[Vision API] Fingerprint ready. Dimensions: {len(fingerprint)}")
     return fingerprint
-    

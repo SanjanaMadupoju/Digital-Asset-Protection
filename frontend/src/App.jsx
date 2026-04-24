@@ -261,6 +261,8 @@ function AppInner() {
           <Footer />
         </>
       ) : (
+        <>
+        <Navbar currentPage={page} onNavigate={setPage} />
         <div className="app-layout">
           <Sidebar currentPage={page} onNavigate={setPage} />
           <main className="app-main">
@@ -274,6 +276,7 @@ function AppInner() {
             </div>
           </main>
         </div>
+        </>
       )}
     </div>
   )

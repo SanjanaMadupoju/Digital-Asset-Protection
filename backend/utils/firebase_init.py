@@ -1,14 +1,22 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
+from dotenv import load_dotenv
+load_dotenv()
 import os
+import json
 
-SERVICE_ACCOUNT_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "firebase-service-account.json"
-)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.abspath(SERVICE_ACCOUNT_PATH)
+# SERVICE_ACCOUNT_PATH1 = os.path.join(
+#     os.path.dirname(__file__), "..", "firebase-service-account.json"
+# )
+SERVICE_ACCOUNT_PATH = os.getenv("FIREBASE_SERVICE_ACCOUNT",None)
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.abspath(SERVICE_ACCOUNT_PATH1)
+
+if not SERVICE_ACCOUNT_PATH:
+    raise ValueError("FIREBASE_SERVICE_ACCOUNT environment variable is not set!")
 
 if not firebase_admin._apps:
-    cred = credentials.Certificate(os.path.abspath(SERVICE_ACCOUNT_PATH))
+    # cred = credentials.Certificate(os.path.abspath(SERVICE_ACCOUNT_PATH))
+    cred = credentials.Certificate(json.loads(SERVICE_ACCOUNT_PATH))
     firebase_admin.initialize_app(cred)
     print("[Firebase] Initialised successfully")
 
