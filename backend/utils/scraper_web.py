@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin, quote_plus
 import warnings
 import urllib3
+from playwright.sync_api import sync_playwright
 warnings.filterwarnings("ignore")
 urllib3.disable_warnings()
 
@@ -87,7 +88,6 @@ def _fetch_with_requests(url: str) -> str | None:
 
 def _fetch_with_playwright(url: str) -> str | None:
     try:
-        from playwright.sync_api import sync_playwright
         print(f"[WebScraper] Playwright fallback for: {url[:60]}")
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)

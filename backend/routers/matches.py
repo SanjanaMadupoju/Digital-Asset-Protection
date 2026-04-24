@@ -13,10 +13,10 @@ router = APIRouter()
 def _enrich(doc: dict) -> dict:
     score = doc.get("match_score") or 0
     wm    = doc.get("watermark_found", False)
-    if wm or score >= 0.92:
+    if wm and score >= 0.92:
         doc["risk_level"] = "critical"
         doc["risk_label"] = "Confirmed copy — watermark or very high similarity"
-    elif score >= 0.82:
+    elif wm and score >= 0.82:
         doc["risk_level"] = "high"
         doc["risk_label"] = "Very likely unauthorized copy"
     elif score >= 0.65:

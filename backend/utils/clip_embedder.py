@@ -21,6 +21,8 @@ import requests
 from PIL import Image
 import io
 import warnings
+import google.auth
+import google.auth.transport.requests
 warnings.filterwarnings("ignore")
 
 VECTOR_SIZE = 1408   # Google Vision embedding size
@@ -28,8 +30,6 @@ VECTOR_SIZE = 1408   # Google Vision embedding size
 
 def _get_access_token() -> str:
     """Gets Google Cloud access token from service account."""
-    import google.auth
-    import google.auth.transport.requests
 
     # Try environment variable first (production)
     service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
@@ -151,3 +151,4 @@ def frames_to_fingerprint(frames: list) -> list | None:
     fingerprint = mean_vec.tolist()
     print(f"[Vision API] Fingerprint ready. Dimensions: {len(fingerprint)}")
     return fingerprint
+    

@@ -4,7 +4,7 @@ upload.py — Step 1 router. Saves video metadata to Firestore.
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from utils.file_handler import validate_video, save_video
-from utils.firebase_init import set_video, get_video
+from utils.firebase_init import set_video, get_video, videos_ref
 import uuid
 import datetime
 
@@ -18,14 +18,14 @@ async def upload_video(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=error_msg)
 
     video_id  = str(uuid.uuid4())
-    file_path = await save_video(file, video_id)
+    storage_url = await save_video(file, video_id)
     timestamp = datetime.datetime.utcnow().isoformat()
     
     # Save to Firestore
     set_video(video_id, {
         "video_id":    video_id,
         "filename":    file.filename,
-        "saved_path":  file_path,
+        "saved_path":  storage_url,
         "status":      "uploaded",
         "uploaded_at": timestamp,
         "fingerprinted": False,
@@ -38,7 +38,7 @@ async def upload_video(file: UploadFile = File(...)):
         "success":   True,
         "video_id":  video_id,
         "filename":  file.filename,
-        "saved_path": file_path,
+        "saved_path": storage_url,
         "next_step": "Run POST /api/fingerprint/{video_id} (Step 2)"
     }
 
@@ -53,6 +53,5 @@ def check_status(video_id: str):
 
 @router.get("/videos")
 def list_videos():
-    from utils.firebase_init import videos_ref
     docs = [d.to_dict() for d in videos_ref.stream()]
     return {"total": len(docs), "videos": docs}

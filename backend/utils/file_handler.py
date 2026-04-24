@@ -1,8 +1,9 @@
 import os
 import aiofiles
 from fastapi import UploadFile
+from firebase_admin import storage
 
-UPLOAD_DIR = "uploads"
+# UPLOAD_DIR = "uploads"
 
 # Only these video formats are accepted
 ALLOWED_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
@@ -42,15 +43,32 @@ async def save_video(file: UploadFile, video_id: str) -> str:
     """
     extension = os.path.splitext(file.filename)[-1].lower()
     filename = f"{video_id}{extension}"
-    full_path = os.path.join(UPLOAD_DIR, filename)
+    # full_path = os.path.join(UPLOAD_DIR, filename)
 
     chunk_size = 1024 * 1024  # 1 MB per chunk
 
-    async with aiofiles.open(full_path, "wb") as output_file:
-        while True:
-            chunk = await file.read(chunk_size)
-            if not chunk:
-                break
-            await output_file.write(chunk)
+    chunks = []
 
-    return full_path
+    # async with aiofiles.open(full_path, "wb") as output_file:
+    while True:
+        chunk = await file.read(chunk_size)
+        if not chunk:
+            break
+        # await output_file.write(chunk)
+        chunks.append(chunk)
+    
+    video_bytes = b"".join(chunks)
+
+    # Upload to Firebase Storage
+    storage_url = None
+    try:
+        bucket = storage.bucket("sports-fingerprint-backend.firebasestorage.app")
+        blob = bucket.blob(f"uploads/{filename}")
+        blob.upload_from_string(video_bytes, content_type=file.content_type or "video/mp4")
+        blob.make_public()
+        storage_url = blob.public_url
+        print(f"[Storage] Uploaded: {storage_url}")
+    except Exception as e:
+        print(f"[Storage] Upload warning: {e}")
+
+    return storage_url

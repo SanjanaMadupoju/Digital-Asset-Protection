@@ -231,6 +231,7 @@
 //   )
 // } 
 
+
 import React, { useState } from 'react'
 import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/layout/Navbar'
@@ -239,11 +240,10 @@ import Footer from './components/layout/Footer'
 import Home from './components/pages/Home'
 import UploadPage from './components/pages/UploadPage'
 import FingerprintPage from './components/pages/FingerprintPage'
+import WatermarkedPage from './components/pages/WatermarkedPage'
 import ScrapePage from './components/pages/ScrapePage'
 import MatchPage from './components/pages/MatchPage'
 import Dashboard from './components/Dashboard'
-
-const APP_PAGES = ['upload','fingerprint','scrape','fingerprintscraped','dashboard']
 
 function AppInner() {
   const [page, setPage] = useState('home')
@@ -261,24 +261,19 @@ function AppInner() {
           <Footer />
         </>
       ) : (
-        <>
-        <Navbar currentPage={page} onNavigate={setPage} />
         <div className="app-layout">
-          {/* Left sidebar */}
           <Sidebar currentPage={page} onNavigate={setPage} />
-
-          {/* Main content */}
           <main className="app-main">
             <div className="app-main-inner">
               {page === 'upload'             && <UploadPage />}
               {page === 'fingerprint'        && <FingerprintPage />}
+              {page === 'watermarked'        && <WatermarkedPage />}
               {page === 'scrape'             && <ScrapePage />}
               {page === 'fingerprintscraped' && <MatchPage />}
               {page === 'dashboard'          && <Dashboard />}
             </div>
           </main>
         </div>
-        </>
       )}
     </div>
   )
