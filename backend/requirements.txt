@@ -2,6 +2,7 @@ fastapi
 uvicorn
 python-multipart
 aiofiles
+python-dotenv
 
 # Step 2 - Watermark + Fingerprint + Storage
 opencv-python
