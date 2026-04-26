@@ -5,7 +5,6 @@ aiofiles
 python-dotenv
 
 # Step 2 - Watermark + Fingerprint + Storage
-opencv-python
 numpy
 Pillow
 # torch
@@ -37,4 +36,4 @@ google-auth
 google-auth-httplib2
 # CLIP installed separately - run this after pip install -r requirements.txt:
 # pip install git+https://github.com/openai/CLIP.git
-# python -m playwright install chromium
+# python -m playwright install chromiumpython-dotenv
