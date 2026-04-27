@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 // ── Tag chip input ────────────────────────────────────────────────────────────
 function ChipInput({ label, placeholder, items, onChange }) {
@@ -216,7 +216,7 @@ export default function Scrape() {
     setLoadingPost(true)
     showStatus('running', `Running scraper for video_id: ${videoId}…`)
     try {
-      const res = await axios.post('/api/scrape', {
+      const res = await api.post('/api/scrape', {
         video_id:            videoId.trim(),
         sport:               sport.trim(),
         keywords:            keywords.join(' '), 
@@ -238,7 +238,7 @@ export default function Scrape() {
     setLoadingGet(true)
     showStatus('running', `Fetching scraped URLs for ${videoId}…`)
     try {
-      const res = await axios.get(`/api/scrape/${videoId.trim()}`)
+      const res = await api.get(`/api/scrape/${videoId.trim()}`)
       setGetResult(res.data)
       showStatus('success', `Found ${res.data.total} URLs · ${res.data.flagged} flagged`)
       setActiveTab('get')

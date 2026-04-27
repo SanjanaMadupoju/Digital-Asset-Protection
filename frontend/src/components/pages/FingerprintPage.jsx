@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 function RadarViz({ active }) {
   const dots = [
@@ -44,7 +44,7 @@ export default function FingerprintPage() {
     addLog('Embedding invisible watermark...')
     addLog('Running Google Vision AI...')
     try {
-      const res = await axios.post(`/api/fingerprint/${videoId.trim()}`)
+      const res = await api.post(`/api/fingerprint/${videoId.trim()}`)
       addLog('Mean-pooling frame embeddings...')
       addLog('Saving to Firebase + Qdrant...')
       setResult(res.data)

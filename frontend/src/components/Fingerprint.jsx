@@ -1,6 +1,6 @@
 // ── Fingerprint.jsx — replaces old Fingerprint component ──────────────────
 import React, { useState } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 function FingerprintPreview({ values, note }) {
@@ -137,7 +137,7 @@ export default function Fingerprint() {
     setLoadingPost(true)
     setStatus({ type: 'running', msg: `Running fingerprint pipeline for ${videoId} — may take 30–120 s…` })
     try {
-      const res = await axios.post(`/api/fingerprint/${videoId}`)
+      const res = await api.post(`/api/fingerprint/${videoId}`)
       setPostResult(res.data)
       setStatus({ type: 'success', msg: `Pipeline complete · ${res.data.frames_processed} frames · ${res.data.vector_dimensions}D vector saved` })
       setActiveTab('post')
@@ -153,7 +153,7 @@ export default function Fingerprint() {
     setLoadingGet(true)
     setStatus({ type: 'running', msg: `Fetching stored fingerprint for ${videoId}…` })
     try {
-      const res = await axios.get(`/api/fingerprint/${videoId}`)
+      const res = await api.get(`/api/fingerprint/${videoId}`)
       setGetResult(res.data)
       setStatus({ type: 'success', msg: `Fingerprint found · created ${new Date(res.data.created_at).toLocaleString()}` })
       setActiveTab('get')

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 export default function WatermarkedPage() {
   const [videoId,  setVideoId]  = useState('')
@@ -11,7 +11,7 @@ export default function WatermarkedPage() {
     if (!videoId.trim()) return
     setLoading(true); setError(null); setResult(null)
     try {
-      const res = await axios.get(`/api/watermarked/${videoId.trim()}`)
+      const res = await api.get(`/api/watermarked/${videoId.trim()}`)
       setResult(res.data)
     } catch (e) {
       setError(e.response?.data?.detail || e.message || 'Not found')
@@ -22,7 +22,7 @@ export default function WatermarkedPage() {
 
   const handleDownload = async () => {
     try {
-        const res = await axios.get(`/api/download/${videoId.trim()}`, {
+        const res = await api.get(`/api/download/${videoId.trim()}`, {
             responseType: "blob"
         })
         console.log(res)

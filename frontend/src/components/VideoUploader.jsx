@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 // ─── tiny helper: format bytes into KB / MB ───────────────────────────────
 function formatBytes(bytes) {
@@ -80,7 +80,7 @@ export default function VideoUploader() {
     formData.append('file', file)   // 'file' must match the FastAPI parameter name
 
     try {
-      const response = await axios.post('/api/upload', formData, {
+      const response = await api.post('/api/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         // onUploadProgress fires repeatedly as chunks are sent
         onUploadProgress: (event) => {

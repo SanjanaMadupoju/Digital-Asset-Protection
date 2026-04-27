@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 const PLATFORMS = [
   { id: 'youtube',     label: 'YouTube',     icon: '▶️' },
@@ -58,7 +58,7 @@ export default function ScrapePage() {
     }, 1800)
 
     try {
-      const res = await axios.post('/api/scrape', {
+      const res = await api.post('/api/scrape', {
         video_id:            videoId.trim(),
         sport:               sport.trim(),
         keywords:            keywords.trim(),

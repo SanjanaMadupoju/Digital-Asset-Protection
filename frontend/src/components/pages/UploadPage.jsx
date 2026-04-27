@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 function formatBytes(b) {
   if (b < 1024 * 1024) return `${(b/1024).toFixed(1)} KB`
@@ -72,7 +72,7 @@ export default function UploadPage() {
     const fd = new FormData()
     fd.append('file', file)
     try {
-      const res = await axios.post('/api/upload', fd, {
+      const res = await api.post('/api/upload', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: e => setProgress(Math.round(e.loaded / e.total * 100))
       })

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import api from '../api'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 function riskColor(level) {
@@ -148,8 +148,8 @@ export default function Dashboard() {
     setLoading(true); setError(null); setSummary(null); setResults(null); setReport(null)
     try {
       const [sumRes, matchRes] = await Promise.all([
-        axios.get(`/api/matches/${videoId}/summary`),
-        axios.get(`/api/matches/${videoId}`),
+        api.get(`/api/matches/${videoId}/summary`),
+        api.get(`/api/matches/${videoId}`),
       ])
       setSummary(sumRes.data)
       setResults(matchRes.data)
@@ -163,7 +163,7 @@ export default function Dashboard() {
   const generateReport = async () => {
     setReporting(true)
     try {
-      const res = await axios.post(`/api/matches/${videoId}/report`)
+      const res = await api.post(`/api/matches/${videoId}/report`)
       setReport(res.data)
     } catch (e) {
       setError(e.response?.data?.detail || 'Report generation failed')

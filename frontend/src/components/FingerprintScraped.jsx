@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 function Badge({ children, color, bg, border }) {
@@ -207,7 +207,7 @@ export default function FingerprintScraped() {
     setLoadingPost(true)
     showStatus('running', `Fingerprinting scraped URLs for ${videoId} (limit: ${limit})… may take several minutes`)
     try {
-      const res = await axios.post(`/api/fingerprint-scraped/${videoId.trim()}`, null, {
+      const res = await api.post(`/api/fingerprint-scraped/${videoId.trim()}`, null, {
         params: { limit: Number(limit) },
         timeout: 600_000,   // 10 min — each URL takes 30-120s on CPU
       })
@@ -226,7 +226,7 @@ export default function FingerprintScraped() {
     setLoadingGet(true)
     showStatus('running', `Fetching summary for ${videoId}…`)
     try {
-      const res = await axios.get(`/api/fingerprint-scraped/${videoId.trim()}/summary`)
+      const res = await api.get(`/api/fingerprint-scraped/${videoId.trim()}/summary`)
       setGetResult(res.data)
       showStatus('success', `${res.data.total_urls} total · ${res.data.flagged} flagged`)
       setActiveTab('get')

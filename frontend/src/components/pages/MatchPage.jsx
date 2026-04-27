@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import api from '../../api'
 
 function ParticleViz({ active, results }) {
   const dots = Array.from({ length: 32 }, (_, i) => i)
@@ -54,7 +54,7 @@ export default function MatchPage() {
     if (!videoId.trim()) return
     setLoading(true); setError(null); setResult(null)
     try {
-      const res = await axios.post(`/api/fingerprint-scraped/${videoId.trim()}?limit=${limit}`)
+      const res = await api.post(`/api/fingerprint-scraped/${videoId.trim()}?limit=${limit}`)
       setResult(res.data)
     } catch (e) {
       setError(e.response?.data?.detail || e.message || 'Match failed')
