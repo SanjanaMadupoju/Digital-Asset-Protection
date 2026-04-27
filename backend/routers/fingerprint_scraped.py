@@ -4,7 +4,7 @@ fingerprint_scraped.py — Step 4 router. Now saves to Firestore instead of Mong
 
 from fastapi import APIRouter, HTTPException
 from utils.scraper_db import get_pending_urls, update_url_status, get_all_scraped
-from utils.frame_downloader import download_frames, get_frames_requests
+from utils.frame_downloader import download_frames, get_frames_requests,get_frames_playwright
 from utils.clip_embedder import frames_to_fingerprint
 from utils.watermark import verify_watermark
 from utils.firebase_init import fingerprints_ref
@@ -65,7 +65,7 @@ def fingerprint_scraped_urls(video_id: str, limit: int = 10):
         try:
             # Download frames (full_res for watermark, clip for CLIP)
             frames = download_frames(url, platform)
-
+            # frames = get_frames_playwright(url)
             if not frames:
                 if platform == "youtube":
                     # full_res_r, clip_r = get_frames_requests(url)
