@@ -212,44 +212,44 @@ def get_frames_ytdlp(url: str) -> list:
 
 # ── Playwright screenshot (browser platforms) ─────────────────────────────────
 
-# def get_frames_playwright(url: str) -> list:
-#     """
-#     Takes a screenshot of the page using Playwright.
-#     Converts the screenshot to a numpy array (treated as one "frame").
-#     Used for Twitter, Facebook etc where we can see the video thumbnail.
-#     """
-#     print(f"[Downloader] Playwright screenshot: {url[:70]}...")
-#     try:
-#         from playwright.sync_api import sync_playwright
-#         with sync_playwright() as p:
-#             browser = p.chromium.launch(headless=True)
-#             ctx = browser.new_context(
-#                 ignore_https_errors=True,   # bypass corporate SSL in browser too
-#                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-#             )
-#             page = ctx.new_page()
-#             page.goto(url, timeout=20000, wait_until="domcontentloaded")
-#             page.wait_for_timeout(2000)   # wait for thumbnails to load
+def get_frames_playwright(url: str) -> list:
+    """
+    Takes a screenshot of the page using Playwright.
+    Converts the screenshot to a numpy array (treated as one "frame").
+    Used for Twitter, Facebook etc where we can see the video thumbnail.
+    """
+    print(f"[Downloader] Playwright screenshot: {url[:70]}...")
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            ctx = browser.new_context(
+                ignore_https_errors=True,   # bypass corporate SSL in browser too
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            )
+            page = ctx.new_page()
+            page.goto(url, timeout=20000, wait_until="domcontentloaded")
+            page.wait_for_timeout(2000)   # wait for thumbnails to load
 
-#             # Take screenshot as bytes
-#             screenshot_bytes = page.screenshot(full_page=False)
-#             browser.close()
+            # Take screenshot as bytes
+            screenshot_bytes = page.screenshot(full_page=False)
+            browser.close()
 
-#         # Convert PNG bytes → numpy array → BGR (OpenCV format)
-#         nparr = np.frombuffer(screenshot_bytes, np.uint8)
-#         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-#         if img is None:
-#             return []
+        # Convert PNG bytes → numpy array → BGR (OpenCV format)
+        nparr = np.frombuffer(screenshot_bytes, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            return []
 
-#         # Resize to 224x224 for CLIP
-#         # resized = cv2.resize(img, (224, 224))
-#         resized = img
-#         print(f"[Downloader] Playwright got 1 screenshot frame")
-#         return [resized]
+        # Resize to 224x224 for CLIP
+        # resized = cv2.resize(img, (224, 224))
+        resized = img
+        print(f"[Downloader] Playwright got 1 screenshot frame")
+        return [resized]
 
-#     except Exception as e:
-#         print(f"[Downloader] Playwright failed for {url}: {e}")
-#         return []
+    except Exception as e:
+        print(f"[Downloader] Playwright failed for {url}: {e}")
+        return []
 
 # def get_frames_playwright(url: str) -> list:
 #     print(f"[Downloader] Playwright screenshot: {url[:70]}...")
@@ -307,70 +307,70 @@ def get_frames_ytdlp(url: str) -> list:
 #         print(f"[Downloader] Playwright failed for {url}: {e}")
 #         return []
 
-def get_frames_playwright(url: str) -> list:
-    print(f"[Downloader] Playwright screenshot: {url[:70]}...")
-    try:
-        from playwright.sync_api import sync_playwright
+# def get_frames_playwright(url: str) -> list:
+#     print(f"[Downloader] Playwright screenshot: {url[:70]}...")
+#     try:
+#         from playwright.sync_api import sync_playwright
 
-        video_url = None
+#         video_url = None
 
-        def handle_request(request):
-            nonlocal video_url
-            # Intercept actual video stream requests
-            if any(ext in request.url for ext in ['.mp4', '.m3u8', '.ts', 'videoplayback']):
-                if not video_url:
-                    video_url = request.url
-                    print(f"[Downloader] Intercepted video URL: {request.url[:70]}")
+#         def handle_request(request):
+#             nonlocal video_url
+#             # Intercept actual video stream requests
+#             if any(ext in request.url for ext in ['.mp4', '.m3u8', '.ts', 'videoplayback']):
+#                 if not video_url:
+#                     video_url = request.url
+#                     print(f"[Downloader] Intercepted video URL: {request.url[:70]}")
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            ctx = browser.new_context(
-                ignore_https_errors=True,
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            )
-            page = ctx.new_page()
-            page.on("request", handle_request)  # ✅ intercept requests
-            page.goto(url, timeout=30000, wait_until="domcontentloaded")
+#         with sync_playwright() as p:
+#             browser = p.chromium.launch(headless=True)
+#             ctx = browser.new_context(
+#                 ignore_https_errors=True,
+#                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+#             )
+#             page = ctx.new_page()
+#             page.on("request", handle_request)  # ✅ intercept requests
+#             page.goto(url, timeout=30000, wait_until="domcontentloaded")
             
-            # ✅ Click play to trigger video requests
-            try:
-                page.evaluate("document.querySelector('video')?.play()")
-            except:
-                pass
+#             # ✅ Click play to trigger video requests
+#             try:
+#                 page.evaluate("document.querySelector('video')?.play()")
+#             except:
+#                 pass
             
-            page.wait_for_timeout(5000)  # wait for video to start loading
-            browser.close()
+#             page.wait_for_timeout(5000)  # wait for video to start loading
+#             browser.close()
 
-        if not video_url:
-            print(f"[Downloader] Playwright: no video URL intercepted")
-            return []
+#         if not video_url:
+#             print(f"[Downloader] Playwright: no video URL intercepted")
+#             return []
 
-        # ✅ Download and extract frames same as yt-dlp
-        out_path = os.path.join(TEMP_DIR, f"{uuid.uuid4()}.mp4")
-        os.makedirs(TEMP_DIR, exist_ok=True)
+#         # ✅ Download and extract frames same as yt-dlp
+#         out_path = os.path.join(TEMP_DIR, f"{uuid.uuid4()}.mp4")
+#         os.makedirs(TEMP_DIR, exist_ok=True)
 
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Referer": url
-        }
-        resp = requests.get(video_url, headers=headers, stream=True, timeout=30, verify=False)
+#         headers = {
+#             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+#             "Referer": url
+#         }
+#         resp = requests.get(video_url, headers=headers, stream=True, timeout=30, verify=False)
 
-        with open(out_path, "wb") as f:
-            for chunk in resp.iter_content(chunk_size=1024 * 1024):
-                f.write(chunk)
+#         with open(out_path, "wb") as f:
+#             for chunk in resp.iter_content(chunk_size=1024 * 1024):
+#                 f.write(chunk)
 
-        if not os.path.exists(out_path) or os.path.getsize(out_path) < 1000:
-            print(f"[Downloader] Playwright: video download too small")
-            return []
+#         if not os.path.exists(out_path) or os.path.getsize(out_path) < 1000:
+#             print(f"[Downloader] Playwright: video download too small")
+#             return []
 
-        # ✅ Same as yt-dlp!
-        frames = _extract_frames_from_clip(out_path)
-        print(f"[Downloader] Playwright extracted {len(frames)} frames")
-        return frames
+#         # ✅ Same as yt-dlp!
+#         frames = _extract_frames_from_clip(out_path)
+#         print(f"[Downloader] Playwright extracted {len(frames)} frames")
+#         return frames
 
-    except Exception as e:
-        print(f"[Downloader] Playwright failed for {url}: {e}")
-        return []
+#     except Exception as e:
+#         print(f"[Downloader] Playwright failed for {url}: {e}")
+#         return []
 
 # ── requests + BeautifulSoup (og:image fallback) ─────────────────────────────
 
@@ -408,6 +408,52 @@ def get_frames_requests(url: str) -> list:
     # Fallback to Playwright
     return get_frames_playwright(url)
 
+def _get_youtube_thumbnail_frames(url: str) -> list:
+    """
+    Gets YouTube video thumbnail as a frame.
+    Works on Cloud Run — no download needed, just image fetch.
+    YouTube provides multiple thumbnail qualities:
+      maxresdefault.jpg (1280x720)
+      hqdefault.jpg     (480x360)
+      mqdefault.jpg     (320x180)
+    """
+    import re
+    
+    # Extract video ID from URL
+    match = re.search(r'(?:v=|youtu\.be/)([a-zA-Z0-9_-]{11})', url)
+    if not match:
+        print(f"[Downloader] Could not extract YouTube video ID from: {url}")
+        return get_frames_requests(url)
+    
+    video_id = match.group(1)
+    
+    # Try thumbnails in order of quality
+    thumbnail_urls = [
+        f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg",
+        f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg",
+        f"https://img.youtube.com/vi/{video_id}/mqdefault.jpg",
+    ]
+    
+    frames = []
+    for thumb_url in thumbnail_urls:
+        try:
+            resp = requests.get(thumb_url, timeout=10, verify=False)
+            if resp.status_code == 200 and len(resp.content) > 1000:
+                nparr = np.frombuffer(resp.content, np.uint8)
+                img   = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                if img is not None:
+                    print(f"[Downloader] YouTube thumbnail fetched: {thumb_url}")
+                    frames.append(img)
+        except Exception as e:
+            print(f"[Downloader] Thumbnail fetch failed: {e}")
+            continue
+
+        if frames:
+            print(f"[Downloader] Got {len(frames)} YouTube thumbnails")
+            return frames
+    
+    # All thumbnails failed → og:image fallback
+    return get_frames_requests(url)
 
 # ── Main dispatcher ───────────────────────────────────────────────────────────
 
@@ -422,6 +468,12 @@ def download_frames(url: str, platform: str) -> list:
     Returns:
         List of BGR numpy arrays (224x224), empty list on failure
     """
+    IS_CLOUD_RUN = os.getenv("K_SERVICE") is not None
+    
+    if IS_CLOUD_RUN and (_is_platform(url, YTDLP_PLATFORMS) or platform in ["youtube", "dailymotion"]):
+        print(f"[Downloader] Cloud Run — using YouTube thumbnail API")
+        return _get_youtube_thumbnail_frames(url)
+
     if _is_platform(url, YTDLP_PLATFORMS) or platform in ["youtube", "dailymotion"]:
         frames = get_frames_ytdlp(url)
         if frames:
