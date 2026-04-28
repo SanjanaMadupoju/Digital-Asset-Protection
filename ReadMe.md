@@ -1,6 +1,6 @@
 Working Protocol Link : https://sports-fingerprint-backend.web.app
 
-steps:
+steps to run in local system:
 
 mkdir  sports-fingerprint
 mkdir  backend
@@ -8,8 +8,7 @@ cd sports-fingerprint/backend
 python -m venv venv  
  venv\Scripts\Activate 
  ( New-Item requirements.txt )
- npm install    
- pip install git+https://github.com/openai/CLIP.git  
+ npm install     
 pip install -r requirements.txt    
 playwright install chromium  / playwright install chromium --ignore-certificate-errors          
 
