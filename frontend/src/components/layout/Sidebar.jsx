@@ -44,10 +44,9 @@ import { useTheme } from '../../context/ThemeContext'
 const STEPS = [
   { key: 'upload',             icon: '📤', label: 'Upload',           sub: 'Step 1' },
   { key: 'fingerprint',        icon: '🧠', label: 'Fingerprint',      sub: 'Step 2' },
-  { key: 'watermarked',        icon: '🛡️', label: 'Watermarked video', sub: 'Step 2b' },
-  { key: 'scrape',             icon: '🌐', label: 'Scrape',            sub: 'Step 3' },
-  { key: 'fingerprintscraped', icon: '🔍', label: 'Match scraped',     sub: 'Step 4' },
-  { key: 'dashboard',          icon: '📊', label: 'Dashboard',         sub: 'Steps 5–6' },
+  { key: 'scrape',             icon: '🌐', label: 'Scrape YouTube',    sub: 'Step 3' },
+  { key: 'results',            icon: '🔍', label: 'Results & Action',  sub: 'Steps 4–6' },
+  { key: 'dashboard',          icon: '📊', label: 'Dashboard',         sub: 'Overview' },
 ]
 
 export default function Sidebar({ currentPage, onNavigate }) {

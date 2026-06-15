@@ -3,6 +3,9 @@ import aiofiles
 from fastapi import UploadFile
 from firebase_admin import storage
 
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "..", "uploads")
+os.makedirs(os.path.abspath(UPLOAD_DIR), exist_ok=True)
+
 # UPLOAD_DIR = "uploads"
 
 # Only these video formats are accepted
@@ -43,21 +46,20 @@ async def save_video(file: UploadFile, video_id: str) -> str:
     """
     extension = os.path.splitext(file.filename)[-1].lower()
     filename = f"{video_id}{extension}"
-    # full_path = os.path.join(UPLOAD_DIR, filename)
+    full_path = os.path.abspath(os.path.join(UPLOAD_DIR, filename))
 
     chunk_size = 1024 * 1024  # 1 MB per chunk
 
-    chunks = []
+    # Always persist locally so Step 2 can continue even if cloud storage is unavailable.
+    async with aiofiles.open(full_path, "wb") as output_file:
+        while True:
+            chunk = await file.read(chunk_size)
+            if not chunk:
+                break
+            await output_file.write(chunk)
 
-    # async with aiofiles.open(full_path, "wb") as output_file:
-    while True:
-        chunk = await file.read(chunk_size)
-        if not chunk:
-            break
-        # await output_file.write(chunk)
-        chunks.append(chunk)
-    
-    video_bytes = b"".join(chunks)
+    with open(full_path, "rb") as f:
+        video_bytes = f.read()
 
     # Upload to Firebase Storage
     storage_url = None
@@ -71,4 +73,8 @@ async def save_video(file: UploadFile, video_id: str) -> str:
     except Exception as e:
         print(f"[Storage] Upload warning: {e}")
 
-    return storage_url
+    if storage_url:
+        return storage_url
+
+    print(f"[Storage] Falling back to local file: {full_path}")
+    return full_path

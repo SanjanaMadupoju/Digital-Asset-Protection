@@ -2,11 +2,7 @@ import React, { useState } from 'react'
 import api from '../../api'
 
 const PLATFORMS = [
-  { id: 'youtube',     label: 'YouTube',     icon: '▶️' },
-  { id: 'dailymotion', label: 'Dailymotion', icon: '🎞️' },
-  { id: 'twitter',     label: 'Twitter/X',   icon: '🐦' },
-  { id: 'facebook',    label: 'Facebook',    icon: '📘' },
-  { id: 'web',         label: 'Web search',  icon: '🌐' },
+  { id: 'youtube', label: 'YouTube', icon: '▶️' },
 ]
 
 function WaveformViz({ active }) {
@@ -36,11 +32,21 @@ function WaveformViz({ active }) {
 }
 
 export default function ScrapePage() {
+  const savedDefaults = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('youtubeSearchContext') || '{}')
+    } catch {
+      return {}
+    }
+  })()
+
   const [videoId,   setVideoId]   = useState('')
-  const [sport,     setSport]     = useState('')
-  const [keywords,  setKeywords]  = useState('')
+  const [sport,     setSport]     = useState(savedDefaults.sport || 'cricket')
+  const [keywords,  setKeywords]  = useState(savedDefaults.league || 'IPL')
+  const [durationMin, setDurationMin] = useState(savedDefaults.duration_min ?? 120)
+  const [durationMax, setDurationMax] = useState(savedDefaults.duration_max ?? 1200)
+  const [minViewCount, setMinViewCount] = useState(savedDefaults.min_view_count ?? 1000)
   const [maxResults,setMaxResults]= useState(5)
-  const [channels,  setChannels]  = useState('')
   const [loading,   setLoading]   = useState(false)
   const [result,    setResult]    = useState(null)
   const [error,     setError]     = useState(null)
@@ -50,7 +56,7 @@ export default function ScrapePage() {
     if (!videoId.trim() || !sport.trim() || !keywords.trim()) return
     setLoading(true); setError(null); setResult(null)
 
-    const platformOrder = ['youtube', 'web', 'dailymotion', 'twitter', 'facebook']
+    const platformOrder = ['youtube']
     let i = 0
     const interval = setInterval(() => {
       setActivePlat(platformOrder[i % platformOrder.length])
@@ -62,7 +68,9 @@ export default function ScrapePage() {
         video_id:            videoId.trim(),
         sport:               sport.trim(),
         keywords:            keywords.trim(),
-        suspicious_channels: channels.trim() ? channels.split('\n').map(c => c.trim()).filter(Boolean) : [],
+        duration_min:        durationMin || null,
+        duration_max:        durationMax || null,
+        min_view_count:      minViewCount || null,
         max_results:         maxResults,
       })
       setResult(res.data)
@@ -79,8 +87,8 @@ export default function ScrapePage() {
     <div className="animate-fade-up">
       <div className="page-heading">
         <div className="page-heading-badge"><span className="badge badge-muted">Step 3</span></div>
-        <h2 className="page-heading-title">Scan the web</h2>
-        <p className="page-heading-sub">Search YouTube, Dailymotion, Twitter/X, Facebook and the web for your content</p>
+        <h2 className="page-heading-title">Scan YouTube</h2>
+        <p className="page-heading-sub">Search only YouTube with sports-specific filters for fast and relevant matches</p>
       </div>
 
       {/* Waveform viz */}
@@ -119,8 +127,19 @@ export default function ScrapePage() {
             <input className="input" type="number" min={1} max={20} value={maxResults} onChange={e => setMaxResults(Number(e.target.value))} />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, display: 'block' }}>Suspicious channels (optional)</label>
-            <input className="input" placeholder="YouTube channel URLs, one per line" value={channels} onChange={e => setChannels(e.target.value)} />
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, display: 'block' }}>Min views</label>
+            <input className="input" type="number" min={0} value={minViewCount} onChange={e => setMinViewCount(Number(e.target.value) || 0)} />
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, display: 'block' }}>Min duration (sec)</label>
+            <input className="input" type="number" min={0} value={durationMin} onChange={e => setDurationMin(Number(e.target.value) || 0)} />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, display: 'block' }}>Max duration (sec)</label>
+            <input className="input" type="number" min={0} value={durationMax} onChange={e => setDurationMax(Number(e.target.value) || 0)} />
           </div>
         </div>
 
@@ -146,7 +165,7 @@ export default function ScrapePage() {
               </div>
             )}
             <div className="alert alert-info mt-12" style={{ fontSize: 12 }}>
-              Next: Go to <strong>Step 4 · Match scraped</strong> to fingerprint and compare these URLs.
+              Next: Go to <strong>Results and Action</strong> to fingerprint, review report, and send email alerts.
             </div>
           </div>
         )}

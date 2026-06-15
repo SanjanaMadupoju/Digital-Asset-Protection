@@ -17,6 +17,7 @@ import uuid
 import tempfile
 import requests
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor
 from bs4 import BeautifulSoup
 import yt_dlp
 import warnings
@@ -126,21 +127,23 @@ def _extract_frames_from_clip(clip_path: str, n_frames: int = TARGET_FRAMES) -> 
         cap.release()
         return []
 
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    # frame_step = max(1, int(fps * 2))  # same as FRAME_INTERVAL_SECONDS = 2
+    fps = cap.get(cv2.CAP_PROP_FPS) or 25
     frame_step = max(1, int(fps * 5))
 
-    frames = []
-    frame_number = 0
+    # Select a small, evenly spaced set of frame indices.
+    frame_indices = [min(total - 1, i * frame_step) for i in range(n_frames)]
 
-    while True:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
-        ok, frame = cap.read()
-        if not ok:
-            break
-        # frames.append(cv2.resize(frame, (224, 224)))
-        frames.append(frame)
-        frame_number += frame_step
+    def _read_at(frame_index: int):
+        local_cap = cv2.VideoCapture(clip_path)
+        if not local_cap.isOpened():
+            return None
+        local_cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+        ok, frame = local_cap.read()
+        local_cap.release()
+        return frame if ok else None
+
+    with ThreadPoolExecutor(max_workers=min(4, len(frame_indices))) as pool:
+        frames = [f for f in pool.map(_read_at, frame_indices) if f is not None]
 
     cap.release()
 
@@ -400,7 +403,7 @@ def get_frames_requests(url: str) -> list:
                 # resized = cv2.resize(img, (224, 224))
                 print(f"[Downloader] og:image extracted 1 thumbnail frame")
                 # return [resized]
-                return img
+                return [img]
 
     except Exception as e:
         print(f"[Downloader] requests failed for {url}: {e}")

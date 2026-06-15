@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import upload, fingerprint, scraper, fingerprint_scraped, matches, watermarked
+from routers import upload, fingerprint, scraper, fingerprint_scraped, matches, watermarked, reports
 from utils.db import ensure_qdrant_collection
+from utils.scrapers import init_scrapers  # Initialize plugin registry at startup
 import os
 
 app = FastAPI(
@@ -40,6 +41,7 @@ app.include_router(watermarked.router, prefix="/api", tags=["Watermarked Video"]
 app.include_router(scraper.router,             prefix="/api", tags=["Step 3 - Scrape"])
 app.include_router(fingerprint_scraped.router, prefix="/api", tags=["Step 4 - Fingerprint Scraped"])
 app.include_router(matches.router,             prefix="/api", tags=["Step 5 - Matches"])
+app.include_router(reports.router,              prefix="/api", tags=["Reports & Email Alerts"])
 
 @app.get("/")
 def root():

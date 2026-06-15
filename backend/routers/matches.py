@@ -3,11 +3,18 @@ matches.py — Step 5 router. Reads from Firestore instead of MongoDB.
 """
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, EmailStr
 from utils.scraper_db import get_all_scraped
 from utils.firebase_init import get_fingerprint, reports_ref
+from utils.email_service import email_service
 import datetime
 
 router = APIRouter()
+
+
+class ReportEmailRequest(BaseModel):
+    email: EmailStr
+    violation_filter: str = "all"  # critical | high | all
 
 
 def _enrich(doc: dict) -> dict:
@@ -107,6 +114,8 @@ def generate_report(video_id: str):
 
     report = {
         "report_generated_at": timestamp,
+        "email_sent": False,
+        "email_status": None,
         "original_asset": {
             "video_id":        video_id,
             "filename":        orig.get("video_path", "unknown") if orig else "unknown",
@@ -134,5 +143,30 @@ def generate_report(video_id: str):
     # Save report to Firestore
     reports_ref.add({**report, "video_id": video_id})
     print(f"[Firestore] Report saved for: {video_id}")
+
+    return report
+
+
+@router.post("/matches/{video_id}/report-and-email")
+def generate_report_and_email(video_id: str, req: ReportEmailRequest):
+    report = generate_report(video_id)
+
+    email_result = email_service.send_violation_alert(
+        recipient_email=req.email,
+        video_title=f"Uploaded Video ({video_id})",
+        violations=report.get("violations", []),
+        violation_filter=req.violation_filter,
+    )
+
+    report["email_sent"] = bool(email_result.get("sent"))
+    report["email_status"] = {
+        "recipient": req.email,
+        "filter": req.violation_filter,
+        "method": email_result.get("method"),
+        "error": email_result.get("error"),
+        "timestamp": datetime.datetime.utcnow().isoformat(),
+    }
+
+    reports_ref.add({**report, "video_id": video_id})
 
     return report

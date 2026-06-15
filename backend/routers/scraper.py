@@ -1,16 +1,15 @@
 """
 scraper.py — Step 3 router. Collects actual video URLs only.
+
+YouTube-only MVP using plugin architecture.
+Searches YouTube with SearchContext filters for sports content narrowing.
 """
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from utils.scraper_youtube import search_youtube, scan_channel
-from utils.scraper_web import (
-    google_search_video_urls,
-    bing_search_video_urls,
-    search_dailymotion,
-    search_twitter
-)
+from typing import Optional
+from datetime import datetime
+from utils.scraper_plugin import scraper_registry, SearchContext
 from utils.scraper_db import save_urls, get_all_scraped
 import time
 
@@ -18,78 +17,65 @@ router = APIRouter()
 
 
 class ScrapeRequest(BaseModel):
+    """Request to scrape YouTube for video URLs matching a given context."""
     video_id:            str
     sport:               str
     keywords:            str
-    suspicious_channels: list[str] = []
+    
+    # SearchContext filters (all optional)
+    duration_min:        Optional[int] = None      # Min duration in seconds
+    duration_max:        Optional[int] = None      # Max duration in seconds
+    min_view_count:      Optional[int] = None      # Min view count (e.g., 1000)
+    uploaded_after:      Optional[datetime] = None # Only videos after this date
+    channel_whitelist:   Optional[list[str]] = None # Only these channels
+    channel_blacklist:   Optional[list[str]] = None # Exclude these channels
+    
     max_results:         int       = 10
 
 
 @router.post("/scrape")
 def run_scraper(req: ScrapeRequest):
     """
-    Runs all scrapers and saves ONLY individual video URLs to MongoDB.
-    Channel pages, profile pages, homepages are all filtered out.
+    Runs enabled scrapers (YouTube MVP) and saves video URLs.
+    
+    Uses SearchContext to narrow YouTube search:
+    - Sport type (e.g., cricket, football)
+    - League/keywords (e.g., IPL, Premier League)
+    - Duration range (e.g., 2-20 min for highlights)
+    - Min view count (e.g., 1000+ to skip noise)
+    - Upload date (e.g., last 7-30 days)
+    - Channel whitelist/blacklist (official broadcasters)
     """
     all_results = []
     errors      = []
 
     print(f"\n[Step3] Scrape started | sport={req.sport} | keywords={req.keywords}")
 
-    # 1. YouTube keyword search (yt-dlp) — only watch?v= URLs
-    print("\n[Step3] Source 1: YouTube yt-dlp search")
-    try:
-        yt = search_youtube(req.sport, req.keywords, req.max_results)
-        all_results.extend(yt)
-    except Exception as e:
-        errors.append(f"YouTube: {e}")
+    # Build SearchContext from request
+    context = SearchContext(
+        video_id=req.video_id,
+        sport=req.sport,
+        keywords=req.keywords,
+        duration_min=req.duration_min,
+        duration_max=req.duration_max,
+        min_view_count=req.min_view_count,
+        uploaded_after=req.uploaded_after,
+        channel_whitelist=req.channel_whitelist,
+        channel_blacklist=req.channel_blacklist,
+        max_results=req.max_results,
+    )
 
-    time.sleep(2)
-    print(req.suspicious_channels)
-    # 2. Suspicious channel scan
-    if req.suspicious_channels:
-        print(f"\n[Step3] Source 2: Scanning {len(req.suspicious_channels)} channels")
-        for ch in req.suspicious_channels:
-            try:
-                ch_res = scan_channel(ch, req.sport, req.max_results)
-                all_results.extend(ch_res)
-                time.sleep(2)
-            except Exception as e:
-                errors.append(f"Channel {ch}: {e}")
+    # Run all enabled scrapers via plugin registry
+    print(f"\n[Step3] Running enabled scrapers...")
+    scraper_results = scraper_registry.search_all(context)
+    
+    # Flatten results from all scrapers
+    for scraper_name, results in scraper_results.items():
+        print(f"[Step3] {scraper_name}: {len(results)} results")
+        # Convert ScraperResult Pydantic models to dict for saving
+        all_results.extend([r.dict() for r in results])
 
-    # 3. Google search (site:youtube.com/watch, site:dailymotion.com/video etc.)
-    print("\n[Step3] Source 3: Google targeted video search")
-    try:
-        google_res = google_search_video_urls(req.sport, req.keywords, req.max_results)
-        all_results.extend(google_res)
-        if not google_res:
-            print("[Step3] Google returned nothing, trying Bing...")
-            bing_res = bing_search_video_urls(req.sport, req.keywords, req.max_results)
-            all_results.extend(bing_res)
-    except Exception as e:
-        errors.append(f"Google/Bing: {e}")
-
-    time.sleep(1)
-
-    # 4. Dailymotion
-    print("\n[Step3] Source 4: Dailymotion")
-    try:
-        dm = search_dailymotion(req.sport, req.keywords, req.max_results)
-        all_results.extend(dm)
-    except Exception as e:
-        errors.append(f"Dailymotion: {e}")
-
-    time.sleep(1)
-
-    # 5. Twitter/X
-    print("\n[Step3] Source 5: Twitter/X")
-    try:
-        tw = search_twitter(req.sport, req.keywords, req.max_results)
-        all_results.extend(tw)
-    except Exception as e:
-        errors.append(f"Twitter: {e}")
-
-    # Deduplicate
+    # Deduplicate by URL
     seen = set()
     unique = []
     for item in all_results:
@@ -114,6 +100,14 @@ def run_scraper(req: ScrapeRequest):
         "video_id":           req.video_id,
         "sport":              req.sport,
         "keywords":           req.keywords,
+        "search_context": {
+            "duration_min":      req.duration_min,
+            "duration_max":      req.duration_max,
+            "min_view_count":    req.min_view_count,
+            "uploaded_after":    req.uploaded_after,
+            "channel_whitelist": req.channel_whitelist,
+            "channel_blacklist": req.channel_blacklist,
+        },
         "total_found":        len(unique),
         "saved_to_mongo":     save_stats["saved"],
         "duplicates_skipped": save_stats["skipped"],

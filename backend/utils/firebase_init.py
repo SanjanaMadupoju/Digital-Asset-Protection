@@ -5,18 +5,39 @@ load_dotenv()
 import os
 import json
 
-# SERVICE_ACCOUNT_PATH1 = os.path.join(
-#     os.path.dirname(__file__), "..", "firebase-service-account.json"
-# )
-SERVICE_ACCOUNT_PATH = os.getenv("FIREBASE_SERVICE_ACCOUNT",None)
-# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.abspath(SERVICE_ACCOUNT_PATH1)
 
-if not SERVICE_ACCOUNT_PATH:
-    raise ValueError("FIREBASE_SERVICE_ACCOUNT environment variable is not set!")
+def _resolve_firebase_credential() -> credentials.Certificate:
+    """
+    Resolve Firebase credentials from environment.
+
+    Supported in order:
+    1. FIREBASE_SERVICE_ACCOUNT (inline JSON string)
+    2. FIREBASE_CREDENTIALS (path to service-account JSON)
+    3. GOOGLE_APPLICATION_CREDENTIALS (path to service-account JSON)
+    """
+    inline_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+    if inline_json:
+        return credentials.Certificate(json.loads(inline_json))
+
+    env_path = os.getenv("FIREBASE_CREDENTIALS") or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if not env_path:
+        raise ValueError(
+            "Firebase credentials missing. Set FIREBASE_SERVICE_ACCOUNT (inline JSON) "
+            "or FIREBASE_CREDENTIALS/GOOGLE_APPLICATION_CREDENTIALS (file path)."
+        )
+
+    # Resolve relative paths from backend directory.
+    if not os.path.isabs(env_path):
+        backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        env_path = os.path.abspath(os.path.join(backend_root, env_path))
+
+    if not os.path.exists(env_path):
+        raise ValueError(f"Firebase credential file not found: {env_path}")
+
+    return credentials.Certificate(env_path)
 
 if not firebase_admin._apps:
-    # cred = credentials.Certificate(os.path.abspath(SERVICE_ACCOUNT_PATH))
-    cred = credentials.Certificate(json.loads(SERVICE_ACCOUNT_PATH))
+    cred = _resolve_firebase_credential()
     firebase_admin.initialize_app(cred)
     print("[Firebase] Initialised successfully")
 

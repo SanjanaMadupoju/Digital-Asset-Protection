@@ -240,9 +240,8 @@ import Footer from './components/layout/Footer'
 import Home from './components/pages/Home'
 import UploadPage from './components/pages/UploadPage'
 import FingerprintPage from './components/pages/FingerprintPage'
-import WatermarkedPage from './components/pages/WatermarkedPage'
 import ScrapePage from './components/pages/ScrapePage'
-import MatchPage from './components/pages/MatchPage'
+import ResultsPage from './components/pages/ResultsPage'
 import Dashboard from './components/Dashboard'
 
 function AppInner() {
@@ -269,9 +268,8 @@ function AppInner() {
             <div className="app-main-inner">
               {page === 'upload'             && <UploadPage />}
               {page === 'fingerprint'        && <FingerprintPage />}
-              {page === 'watermarked'        && <WatermarkedPage />}
               {page === 'scrape'             && <ScrapePage />}
-              {page === 'fingerprintscraped' && <MatchPage />}
+              {page === 'results'            && <ResultsPage />}
               {page === 'dashboard'          && <Dashboard />}
             </div>
           </main>

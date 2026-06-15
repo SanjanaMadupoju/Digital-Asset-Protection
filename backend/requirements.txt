@@ -25,6 +25,9 @@ bcrypt==4.0.1
 pydantic[email]
 
 python-jose[cryptography] 
+
+# Email service (SMTP is stdlib, SendGrid is optional)
+sendgrid>=6.10.0
 passlib[bcrypt] 
 
 firebase-admin

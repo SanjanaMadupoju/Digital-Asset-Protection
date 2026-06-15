@@ -7,6 +7,7 @@ from utils.file_handler import validate_video, save_video
 from utils.firebase_init import set_video, get_video, videos_ref
 import uuid
 import datetime
+import os
 
 router = APIRouter()
 
@@ -20,12 +21,15 @@ async def upload_video(file: UploadFile = File(...)):
     video_id  = str(uuid.uuid4())
     storage_url = await save_video(file, video_id)
     timestamp = datetime.datetime.utcnow().isoformat()
+    is_remote = isinstance(storage_url, str) and storage_url.startswith(("http://", "https://"))
     
     # Save to Firestore
     set_video(video_id, {
         "video_id":    video_id,
         "filename":    file.filename,
         "saved_path":  storage_url,
+        "local_path":  None if is_remote else storage_url,
+        "storage_mode": "firebase" if is_remote else "local",
         "status":      "uploaded",
         "uploaded_at": timestamp,
         "fingerprinted": False,
