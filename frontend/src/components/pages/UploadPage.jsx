@@ -50,6 +50,21 @@ export default function UploadPage() {
   const [progress, setProgress] = useState(0)
   const [result, setResult]     = useState(null)
   const [error, setError]       = useState(null)
+  const [searchContext, setSearchContext] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('youtubeSearchContext') || '{}')
+      return {
+        sport: saved.sport || 'cricket',
+        league: saved.league || 'IPL',
+        duration_min: saved.duration_min ?? 120,
+        duration_max: saved.duration_max ?? 1200,
+        min_view_count: saved.min_view_count ?? 1000,
+      }
+    } catch {
+      return { sport: 'cricket', league: 'IPL', duration_min: 120, duration_max: 1200, min_view_count: 1000 }
+    }
+  })
+  const [savedMessage, setSavedMessage] = useState('')
   const inputRef = useRef()
 
   const handleFile = useCallback((f) => {
@@ -65,6 +80,12 @@ export default function UploadPage() {
   const onInput     = e => handleFile(e.target.files[0])
 
   const reset = () => { setFile(null); setResult(null); setError(null); setProgress(0); setState('idle'); if (inputRef.current) inputRef.current.value = '' }
+
+  const saveSearchDefaults = () => {
+    localStorage.setItem('youtubeSearchContext', JSON.stringify(searchContext))
+    setSavedMessage('Search defaults saved for Step 3.')
+    setTimeout(() => setSavedMessage(''), 1600)
+  }
 
   const upload = async () => {
     if (!file) return
@@ -152,6 +173,40 @@ export default function UploadPage() {
           ) : 'Upload Video'}
         </button>
       )}
+
+      {/* YouTube Search Defaults */}
+      <div className="card mt-16">
+        <p className="fw-600 mb-12" style={{ fontSize: 13 }}>YouTube search defaults for Step 3</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Sport</label>
+            <input className="input" value={searchContext.sport} onChange={e => setSearchContext(s => ({ ...s, sport: e.target.value }))} />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>League / keyword</label>
+            <input className="input" value={searchContext.league} onChange={e => setSearchContext(s => ({ ...s, league: e.target.value }))} />
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Min duration (sec)</label>
+            <input className="input" type="number" min={0} value={searchContext.duration_min} onChange={e => setSearchContext(s => ({ ...s, duration_min: Number(e.target.value) || 0 }))} />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Max duration (sec)</label>
+            <input className="input" type="number" min={0} value={searchContext.duration_max} onChange={e => setSearchContext(s => ({ ...s, duration_max: Number(e.target.value) || 0 }))} />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Min views</label>
+            <input className="input" type="number" min={0} value={searchContext.min_view_count} onChange={e => setSearchContext(s => ({ ...s, min_view_count: Number(e.target.value) || 0 }))} />
+          </div>
+        </div>
+        <div className="flex mt-12" style={{ gap: 8 }}>
+          <button className="btn btn-primary btn-sm" onClick={saveSearchDefaults}>Save defaults</button>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Used automatically in Step 3 scrape.</span>
+        </div>
+        {savedMessage && <div className="alert alert-success mt-12" style={{ fontSize: 12 }}>{savedMessage}</div>}
+      </div>
 
       {/* Error */}
       {error && (

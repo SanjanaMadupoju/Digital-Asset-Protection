@@ -25,18 +25,37 @@ import tempfile
 import requests
 from utils.firebase_init import get_video
 
-def _find_video_file(video_id: str) -> str:
+def _find_video_file(video_id: str) -> tuple[str, bool]:
     # Get storage URL from Firestore
     doc = get_video(video_id)
     if not doc:
         raise HTTPException(status_code=404, detail=f"No video found for: {video_id}")
-    
+
+    local_path = doc.get("local_path")
+    if local_path and os.path.exists(local_path):
+        print(f"[Step2] Using local uploaded file: {local_path}")
+        return local_path, False
+
+    # Backward compatibility: try legacy uploads directory by video_id prefix.
+    uploads_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads"))
+    if os.path.isdir(uploads_dir):
+        for fname in os.listdir(uploads_dir):
+            if fname.startswith(video_id):
+                legacy_path = os.path.join(uploads_dir, fname)
+                print(f"[Step2] Using legacy local upload: {legacy_path}")
+                return legacy_path, False
+
     storage_url = doc.get("saved_path")
     if not storage_url:
-        raise HTTPException(status_code=404, detail=f"No storage URL for: {video_id}")
+        raise HTTPException(status_code=404, detail=f"No saved video path for: {video_id}")
 
-    # Download to temp file for processing
-    response = requests.get(storage_url, stream=True)
+    # If saved_path itself is a local path, use it directly.
+    if os.path.exists(storage_url):
+        print(f"[Step2] Using saved local path: {storage_url}")
+        return storage_url, False
+
+    # Otherwise treat saved_path as remote URL and download temporary copy.
+    response = requests.get(storage_url, stream=True, timeout=60)
     if response.status_code != 200:
         raise HTTPException(status_code=404, detail=f"Could not download video: {storage_url}")
 
@@ -47,12 +66,12 @@ def _find_video_file(video_id: str) -> str:
     tmp.close()
 
     print(f"[Step2] Downloaded video to temp: {tmp.name}")
-    return tmp.name
+    return tmp.name, True
 
 
 @router.post("/fingerprint/{video_id}")
 async def generate_fingerprint(video_id: str):
-    video_path = _find_video_file(video_id)
+    video_path, is_temp_file = _find_video_file(video_id)
     print(f"\n[Step2] Starting for: {video_id}")
 
     # try:
@@ -65,8 +84,8 @@ async def generate_fingerprint(video_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Frame extraction failed: {e}")
     finally:
-        # ✅ Delete temp file after use
-        if os.path.exists(video_path):
+        # Delete only temporary downloaded files, never the original local upload.
+        if is_temp_file and os.path.exists(video_path):
             os.remove(video_path)
             print(f"[Step2] Temp file deleted: {video_path}")
 
